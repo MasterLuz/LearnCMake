@@ -4,6 +4,7 @@
 1. `set(ProjectName getStart)`, 设置变量，这里设置了`ProjectName`等于`getStart`。这里`ProjectName`是用户自定义变量
 1. `project(${ProjectName})`, 指定项目名称
 1. `add_executable(${ProjectName} helloWorld.cpp)`, 给`${ProjectName}`项目添加`helloWorld.cpp`为源文件之一
+1. 实际上可以不用设置ProjectName作为项目名，当我们在Project语句中
 
 ## CMake 命令
 1. `cmake -H. -Bbuild`, 以`.`为根目录，以`build`为生成目录

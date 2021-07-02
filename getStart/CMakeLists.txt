@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-set(ProjectName getStart)
+# set(ProjectName getStart)
+# project(${ProjectName})
 
-project(${ProjectName})
+project(getStart)
 
-add_executable(${ProjectName} helloWorld.cpp)
+add_executable(${PROJECT_NAME} helloWorld.cpp)

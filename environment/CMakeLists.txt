@@ -2,55 +2,62 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 project(environment LANGUAGES CXX)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    message(STATUS "Configuring on/for Linux")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    message(STATUS "Configuring on/for Darwin")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    message(STATUS "Configuring on/for Windows")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "AIX")
-    message(STATUS "Configuring on/for AIX")
-else()
-    message(STATUS "Configuring on/for ${CMAKE_SYSTEM_NAME}")
-endif()
+add_executable(hello)
 
-add_executable(hello hello.cpp)
+# compile option
+# -----------------------------------------------------
+# detect system(Linux, Darwin, Windows, AIX...)
+message(STATUS "Configuring on/for ${CMAKE_SYSTEM_NAME}")
+target_compile_definitions(hello PUBLIC "SYSTEM_NAME=\"${CMAKE_SYSTEM_NAME}\"")
+target_compile_definitions(hello PUBLIC "SYSTEM_${CMAKE_SYSTEM_NAME}")
 
-target_compile_definitions(hello PUBLIC
-    "COMPILER_NAME=\"${CMAKE_CXX_COMPILER_ID}\""
+# detect compiler(Intel, GNU, PGI, XL, MSVC...)
+message(STATUS "Configuring on/for ${CMAKE_CXX_COMPILER_ID}")
+target_compile_definitions(hello PUBLIC "CXX_COMPILER_NAME=\"${CMAKE_CXX_COMPILER_ID}\"")
+target_compile_definitions(hello PUBLIC "CXX_COMPILER_${CMAKE_CXX_COMPILER_ID}")
+
+# detect architecture(i386, i686, x86_64, AMD64...)
+message(STATUS "Configuring on/for ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+target_compile_definitions(hello PUBLIC "ARCHITECTURE=\"${CMAKE_HOST_SYSTEM_PROCESSOR}\"")
+target_compile_definitions(hello PUBLIC "ARCHITECTURE_${CMAKE_HOST_SYSTEM_PROCESSOR}")
+
+# config file
+# -----------------------------------------------------
+# detect host system information
+set(SYSTEM_INFORMATION_LOOKUP_LIST 
+    NUMBER_OF_LOGICAL_CORES
+    NUMBER_OF_PHYSICAL_CORES
+    TOTAL_VIRTUAL_MEMORY
+    AVAILABLE_VIRTUAL_MEMORY
+    TOTAL_PHYSICAL_MEMORY
+    AVAILABLE_PHYSICAL_MEMORY
+    IS_64BIT
+    HAS_FPU
+    HAS_MMX
+    HAS_MMX_PLUS
+    HAS_SSE
+    HAS_SSE2
+    HAS_SSE_FP
+    HAS_SSE_MMX
+    HAS_AMD_3DNOW
+    HAS_AMD_3DNOW_PLUS
+    HAS_IA64
+    OS_NAME
+    OS_RELEASE
+    OS_VERSION
+    OS_PLATFORM
 )
 
-if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
-    target_compile_definitions(hello PUBLIC "IS_INTEL_CXX_COMPILER")
-endif()
+foreach(lookupItem ${SYSTEM_INFORMATION_LOOKUP_LIST})
+    cmake_host_system_information(RESULT _${lookupItem} QUERY ${lookupItem})
+endforeach()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    target_compile_definitions(hello PUBLIC "IS_GNU_CXX_COMPILER")
-endif()
+configure_file(config.h.in config.h @ONLY)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES PGI)
-    target_compile_definitions(hello PUBLIC "IS_PGI_CXX_COMPILER")
-endif()
+# sources
+# -----------------------------------------------------
+target_sources(hello PRIVATE hello.cpp)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES XL)
-    target_compile_definitions(hello PUBLIC "IS_XL_CXX_COMPILER")
-endif()
-
-if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
-    target_compile_definitions(hello PUBLIC "IS_MSVC_CXX_COMPILER")
-endif()
-
-if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "i386")
-    message(STATUS "i386 architecture detected")
-elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "i686")
-    message(STATUS "i686 architecture detected")
-elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64")
-    message(STATUS "x86_64 architecture detected")
-elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "AMD64")
-    message(STATUS "AMD64 architecture detected")
-else()
-    message(STATUS "host processor architecture is unknown")
-endif()
-target_compile_definitions(hello
-    PUBLIC "ARCHITECTURE=\"${CMAKE_HOST_SYSTEM_PROCESSOR}\""
-)
+# includes
+# -----------------------------------------------------
+target_include_directories(hello PRIVATE ${PROJECT_BINARY_DIR})
